@@ -1,0 +1,136 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum Department {
+  POLICE
+  FIRE
+  EMS
+  DOT
+  SWAT
+  K9
+  JUDGE
+  CSI
+  DETECTIVE
+  CORONER
+  ADMIN
+}
+
+enum ApplicationStatus {
+  DRAFT
+  INTERVIEW
+  HUMAN_REVIEW
+  APPROVED
+  DENIED
+}
+
+enum AccountType {
+  EMPLOYEE
+  FTO
+  HR
+}
+
+enum AccountStatus {
+  ACTIVE
+  PENDING_APPROVAL
+  SUSPENDED
+}
+
+enum AccessRequestType {
+  FTO
+  SUPERVISOR
+}
+
+enum AccessRequestStatus {
+  PENDING
+  APPROVED
+  DENIED
+}
+
+model Employee {
+  id              String         @id @default(cuid())
+  username        String         @unique
+  passwordHash    String
+  accountType     AccountType    @default(EMPLOYEE)
+  accountStatus   AccountStatus  @default(ACTIVE)
+  ftoApproved     Boolean        @default(false)
+  supervisorApproved Boolean     @default(false)
+  discordId       String?        @unique
+  displayName     String?
+  age             Int?
+  robloxUsername  String?
+  avatarUrl       String?
+  department      Department?
+  rank            String         @default("Probationary")
+  badgeNumber     String?        @unique
+  callsign        String?
+  experienceWeeks Int            @default(0)
+  isActive        Boolean        @default(false)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  shifts          DutyShift[]
+  strikes         Strike[]
+  applications   Application[]
+  accessRequests  AccessRequest[]
+}
+
+model AccessRequest {
+  id           String             @id @default(cuid())
+  employeeId   String
+  employee     Employee           @relation(fields: [employeeId], references: [id])
+  requestType  AccessRequestType
+  status       AccessRequestStatus @default(PENDING)
+  requestNote  String?
+  reviewNote   String?
+  reviewedById String?
+  reviewedAt   DateTime?
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+
+  @@index([employeeId, status])
+  @@index([status, createdAt])
+}
+
+model Application {
+  id            String            @id @default(cuid())
+  employeeId    String
+  employee      Employee          @relation(fields: [employeeId], references: [id])
+  department    Department
+  requestedRank String?
+  status        ApplicationStatus @default(DRAFT)
+  answers       String            @default("[]")
+  reviewNote    String?
+  reviewedById  String?
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+}
+
+model DutyShift {
+  id                String    @id @default(cuid())
+  employeeId        String
+  employee          Employee  @relation(fields: [employeeId], references: [id])
+  clockInAt         DateTime  @default(now())
+  clockInSignature  String
+  clockOutAt        DateTime?
+  clockOutSignature String?
+  supervisorNote    String?
+  approvedAt        DateTime?
+  approvedById      String?
+  activitySeconds   Int       @default(0)
+  createdAt         DateTime  @default(now())
+}
+
+model Strike {
+  id           String   @id @default(cuid())
+  employeeId   String
+  employee     Employee @relation(fields: [employeeId], references: [id])
+  reason       String
+  createdAt    DateTime @default(now())
+  resolvedAt   DateTime?
+  resolvedById String?
+}
