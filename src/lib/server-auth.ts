@@ -16,6 +16,7 @@ export async function getAuthenticatedEmployee(request: NextRequest) {
       accountStatus: true,
       ftoApproved: true,
       supervisorApproved: true,
+      department: true,
     },
   });
   if (!employee || employee.accountStatus !== "ACTIVE") return null;

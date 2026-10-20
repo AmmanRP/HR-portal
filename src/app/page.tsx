@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Activity, ArrowDownToLine, Bell, ChevronDown, ClipboardList, Clock3, Command, FileText, Fingerprint, Gauge, Menu, Search, Shield, ShieldCheck, Siren, Users, X } from "lucide-react";
+import { Activity, ArrowDownToLine, Bell, ChevronDown, ClipboardList, Clock3, Command, FileText, Fingerprint, Gauge, Gavel, Menu, Search, Shield, ShieldCheck, Siren, Users, X } from "lucide-react";
 import { departments } from "@/lib/policy";
 import { AccessRequestCard } from "@/components/access-request-card";
 
@@ -121,11 +121,12 @@ export default function Home() {
         <div className="agency"><span className="agency-seal"><Siren size={17} /></span><span><b>PATROLDESK</b><small>OPERATIONS</small></span><ChevronDown size={14} className="agency-chevron" /></div>
         <div className="nav-label">WORKSPACE</div>
         <nav className="nav-list" aria-label="Main navigation">
-          {nav.map(({ label, icon: Icon, count }) => <button key={label} onClick={() => { setActiveNav(label); setSidebarOpen(false); }} className={`nav-item ${activeNav === label ? "nav-active" : ""}`}><Icon size={17} /><span>{label}</span>{count && <span className="nav-count">{count}</span>}</button>)}
+          {nav.map(({ label, icon: Icon }) => <button key={label} onClick={() => { setActiveNav(label); setSidebarOpen(false); }} className={`nav-item ${activeNav === label ? "nav-active" : ""}`}><Icon size={17} /><span>{label}</span></button>)}
         </nav>
         <div className="nav-label portal-switch-label">YOUR PORTALS</div>
         <nav className="nav-list" aria-label="Available portals">
           <Link className="nav-item portal-switch-link" href="/"><Users size={16} /><span>Employee portal</span></Link>
+          <Link className="nav-item portal-switch-link" href="/court"><Gavel size={16} /><span>Courthouse</span></Link>
           {account.ftoApproved && <Link className="nav-item portal-switch-link" href="/fto"><ShieldCheck size={16} /><span>FTO portal</span></Link>}
           {account.supervisorApproved && <Link className="nav-item portal-switch-link" href="/supervisor"><Users size={16} /><span>Supervisor portal</span></Link>}
           {account.accountType === "HR" && account.accountStatus === "ACTIVE" && <Link className="nav-item portal-switch-link" href="/hr"><ShieldCheck size={16} /><span>HR portal</span></Link>}

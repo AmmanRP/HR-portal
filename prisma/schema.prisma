@@ -3,8 +3,9 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider  = "postgresql"
   url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 enum Department {
@@ -52,6 +53,36 @@ enum AccessRequestStatus {
   DENIED
 }
 
+enum CourtRole {
+  OFFICER
+  SUSPECT
+  ATTORNEY
+  WITNESS
+  JUDGE
+}
+
+enum CourtCaseStatus {
+  FILED
+  SCHEDULED
+  IN_TRIAL
+  RESOLVED
+  DISMISSED
+}
+
+enum CourtOutcome {
+  GUILTY
+  NOT_GUILTY
+  DISMISSED
+}
+
+enum CourtParticipantRole {
+  OFFICER
+  SUSPECT
+  ATTORNEY
+  WITNESS
+  JUDGE
+}
+
 model Employee {
   id              String         @id @default(cuid())
   username        String         @unique
@@ -77,6 +108,93 @@ model Employee {
   strikes         Strike[]
   applications   Application[]
   accessRequests  AccessRequest[]
+  courtProfile    CourtProfile?
+}
+
+model CourtProfile {
+  id           String       @id @default(cuid())
+  employeeId   String       @unique
+  employee     Employee     @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  role         CourtRole
+  characterName String
+  fictionalSsn String       @unique
+  birthDate    DateTime
+  address      String
+  height       String
+  createdAt    DateTime     @default(now())
+  filedCases   CourtCase[]  @relation("FiledCases")
+  defendantIn  CourtCase[]  @relation("DefendantCases")
+  participations CourtParticipant[]
+  evidence     CourtEvidence[]
+  events       CourtEvent[]
+
+  @@index([characterName])
+}
+
+model CourtCase {
+  id               String           @id @default(cuid())
+  caseNumber       String           @unique
+  filedById        String
+  filedBy          CourtProfile     @relation("FiledCases", fields: [filedById], references: [id])
+  defendantId      String?
+  defendant        CourtProfile?    @relation("DefendantCases", fields: [defendantId], references: [id])
+  defendantName    String
+  stateCode        String
+  charge           String
+  classification   String
+  summary          String
+  status           CourtCaseStatus  @default(FILED)
+  scheduledAt      DateTime?
+  plea             String?
+  outcome          CourtOutcome?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  participants     CourtParticipant[]
+  evidence         CourtEvidence[]
+  events           CourtEvent[]
+
+  @@index([defendantName, status])
+  @@index([status, scheduledAt])
+  @@index([filedById, createdAt])
+}
+
+model CourtParticipant {
+  id        String                @id @default(cuid())
+  caseId    String
+  case      CourtCase             @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  profileId String
+  profile   CourtProfile          @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  role      CourtParticipantRole
+  joinedAt  DateTime              @default(now())
+
+  @@unique([caseId, profileId])
+  @@index([profileId, joinedAt])
+}
+
+model CourtEvidence {
+  id          String       @id @default(cuid())
+  caseId      String
+  case        CourtCase    @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  submittedById String
+  submittedBy CourtProfile @relation(fields: [submittedById], references: [id])
+  label       String
+  description String
+  createdAt   DateTime     @default(now())
+
+  @@index([caseId, createdAt])
+}
+
+model CourtEvent {
+  id        String       @id @default(cuid())
+  caseId    String
+  case      CourtCase    @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  actorId   String
+  actor     CourtProfile @relation(fields: [actorId], references: [id])
+  action    String
+  details   String
+  createdAt DateTime     @default(now())
+
+  @@index([caseId, createdAt])
 }
 
 model AccessRequest {
