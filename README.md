@@ -1,6 +1,6 @@
 # PatrolDesk
 
-PatrolDesk is a starter project for a Discord-connected employee onboarding and duty portal for a roleplay public-safety community. It includes username/password signup and login, an initial Prisma data model, and a dashboard prototype. Department workflows and Discord-to-portal actions still need to be connected before real employee data is used.
+PatrolDesk is an early-stage Discord-connected employee onboarding and duty portal for a roleplay public-safety community. The dashboard reads employee, application, and shift records from the database; it does not seed or display example personnel. Some workflows, including clock actions and Discord account linking, still need implementation before production use.
 
 ## Requirements
 
@@ -21,7 +21,7 @@ Useful checks: `npm run typecheck`, `npm run lint`, and `npm run build`.
 
 ## Current foundation
 
-- Responsive department operations dashboard with roster search and department filtering.
+- Responsive department operations dashboard with authenticated, uncached database-backed roster, shift, application, and review totals; empty data is shown as empty rather than replaced with fixtures.
 - Department ladders, baseline application requirements, unique badge-number generation, callsign formatting, signature normalization, and server-time record helper in `src/lib/policy.ts`.
 - Prisma models for employees, applications, duty shifts, and strikes.
 - Minimal Discord.js bot entry point with an ephemeral `/portal` response.
